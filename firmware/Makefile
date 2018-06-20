@@ -43,17 +43,17 @@ OBJECTS += osccalASM.o
 all: main.hex
 
 .c.o:
-	@$(CC) $(CFLAGS) -c $< -o $@ -Wa,-ahls=$<.lst
+	$(CC) $(CFLAGS) -c $< -o $@ -Wa,-ahls=$<.lst
 
 .S.o:
-	@$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
+	$(CC) $(CFLAGS) -x assembler-with-cpp -c $< -o $@
 # "-x assembler-with-cpp" should not be necessary since this is the default
 # file type for the .S (with capital S) extension. However, upper case
 # characters are not always preserved on Windows. To ensure WinAVR
 # compatibility define the file type manually.
 
 .c.s:
-	@$(CC) $(CFLAGS) -S $< -o $@
+	$(CC) $(CFLAGS) -S $< -o $@
 
 flash:	all
 	$(AVRDUDE) -U flash:w:main.hex:i -B 20
@@ -71,15 +71,15 @@ read_fuses:
 	$(UISP) --rd_fuses -B 20
 
 clean:
-	@rm -f main.hex main.bin main.c.lst main.map main.raw *.o usbdrv/*.o main.s usbdrv/oddebug.s usbdrv/usbdrv.s main.lss
+	@del main.hex main.bin main.c.lst main.map main.raw *.o usbdrv\\*.o main.s usbdrv\\oddebug.s usbdrv\\usbdrv.s main.lss
 
 # file targets:
 main.bin:	$(OBJECTS)
-	@$(CC) $(CFLAGS) -o main.bin $(OBJECTS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o main.bin $(OBJECTS) $(LDFLAGS)
 
 main.hex:	main.bin
 	@echo Building Micronucleus configuration: $(CONFIG)
-	@rm -f main.hex main.eep.hex
+	@del main.hex main.eep.hex
 	@avr-objcopy -j .text -j .data -O ihex main.bin main.hex
 	@echo Size of sections:
 	@avr-size main.bin	
