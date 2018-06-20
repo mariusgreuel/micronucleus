@@ -1,6 +1,7 @@
 /* 
- * Project: Micronucleus -  v2.3
+ * Project: Micronucleus -  v2.4
  *
+ * Micronucleus V2.4             (c) 2018 Marius Greuel
  * Micronucleus V2.3             (c) 2016 Tim Bo"scke - cpldcpu@gmail.com
  *                               (c) 2014 Shay Green
  * Original Micronucleus         (c) 2012 Jenna Fox
@@ -12,7 +13,7 @@
  */
  
 #define MICRONUCLEUS_VERSION_MAJOR 2
-#define MICRONUCLEUS_VERSION_MINOR 3
+#define MICRONUCLEUS_VERSION_MINOR 4
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -41,6 +42,32 @@
 #if ((AUTO_EXIT_MS>0) && (AUTO_EXIT_MS<1000))
   #error "Do not set AUTO_EXIT_MS to below 1s to allow Micronucleus to function properly"
 #endif
+
+typedef struct {
+  uint32_t dwLength;
+  uint16_t bcdVersion;
+  uint16_t wIndex;
+  uint8_t bCount;
+  uint8_t reserved[7];
+} ExtCompatHeader_t;
+
+typedef struct {
+  ExtCompatHeader_t header;
+  uint8_t bFirstInterfaceNumber;
+  uint8_t reserved1;
+  char compatibleID[8];
+  char subCompatibleID[8];
+  uint8_t reserved2[6];
+} ExtCompatDescriptor_t;
+
+PROGMEM const ExtCompatDescriptor_t msExtCompatDescriptor =
+{
+  { sizeof(ExtCompatDescriptor_t), 0x0100, 0x0004, 1 },
+  0,
+  1,
+  "WINUSB",
+  ""
+};
 
 // Device configuration reply
 // Length: 6 bytes
@@ -82,6 +109,7 @@ enum {
   cmd_erase_application=2,
   cmd_write_data=3,
   cmd_exit=4,
+  cmd_get_ms_descriptor=GET_MS_DESCRIPTOR,
   cmd_write_page=64  // internal commands start at 64
 };
 register uint8_t        command         asm("r3");  // bind command to r3 
@@ -187,6 +215,11 @@ static uint8_t usbFunctionSetup(uint8_t data[8]) {
       writeWordToPageBuffer(rq->wIndex.word);
       if ((currentAddress.b[0] % SPM_PAGESIZE) == 0)
           command=cmd_write_page; // ask runloop to write our page       
+  } else if (rq->bRequest == cmd_get_ms_descriptor) {
+    if (rq->wIndex.word == 0x0004) {
+      usbMsgPtr = (usbMsgPtr_t)&msExtCompatDescriptor;
+      return sizeof(msExtCompatDescriptor);
+    }
   } else {
     // Handle cmd_erase_application and cmd_exit
     command=rq->bRequest&0x3f;    

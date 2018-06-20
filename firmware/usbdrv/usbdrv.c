@@ -125,6 +125,15 @@ PROGMEM const int usbDescriptorStringSerialNumber[] = {
 };
 #endif
 
+#if USB_CFG_DESCR_PROPS_STRING_OS_STRING == 0 && USB_CFG_OS_STRING_LEN
+#undef USB_CFG_DESCR_PROPS_STRING_OS_STRING
+#define USB_CFG_DESCR_PROPS_STRING_OS_STRING sizeof(usbDescriptorStringOsString)
+PROGMEM const int usbDescriptorStringOsString[] = {
+    USB_STRING_DESCRIPTOR_HEADER(USB_CFG_OS_STRING_LEN),
+    USB_CFG_OS_STRING
+};
+#endif
+
 #endif  /* USB_CFG_DESCR_PROPS_STRINGS == 0 */
 
 /* --------------------------- Device Descriptor --------------------------- */
@@ -135,7 +144,7 @@ PROGMEM const int usbDescriptorStringSerialNumber[] = {
 PROGMEM const char usbDescriptorDevice[] = {    /* USB device descriptor */
     18,         /* sizeof(usbDescriptorDevice): length of descriptor in bytes */
     USBDESCR_DEVICE,        /* descriptor type */
-    0x10, 0x01,             /* USB version supported */
+    0x00, 0x02,             /* USB version supported */
     USB_CFG_DEVICE_CLASS,
     USB_CFG_DEVICE_SUBCLASS,
     0,                      /* protocol */
@@ -358,6 +367,8 @@ uchar       flags = USB_FLG_MSGPTR_IS_ROM;
             GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_STRING_PRODUCT, usbDescriptorStringDevice)
         SWITCH_CASE(3)
             GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER, usbDescriptorStringSerialNumber)
+        SWITCH_CASE(0xEE)
+            GET_DESCRIPTOR(USB_CFG_DESCR_PROPS_STRING_OS_STRING, usbDescriptorStringOsString)
         SWITCH_DEFAULT
             if(USB_CFG_DESCR_PROPS_UNKNOWN & USB_PROP_IS_DYNAMIC){
                 len = usbFunctionDescriptor(rq);
