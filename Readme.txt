@@ -1,14 +1,3 @@
-Micronucleus V2.04 WINUSB
-=========================
-
-This is a fork of https://github.com/micronucleus/micronucleus
-
-This goal of this fork is to add WINUSB support to micronucleus to improve support for Windows and eliminate the need for third-party USB drivers.
-
-Note: When the Windows built-in WINUSB driver is used, you also need a micronucleus.exe that has WINUSB support compiled in.
-
---
-
 Micronucleus is a bootloader designed for AVR ATtiny microcontrollers with a minimal usb interface, cross platform libusb-based program upload tool, and a strong emphasis on bootloader compactness. To the authors knowledge this is, by far, the smallest USB bootloader for AVR ATtiny
 
 The V2.0 release is a complete rewrite of the firmware and offers significant improvements over V1.x:
